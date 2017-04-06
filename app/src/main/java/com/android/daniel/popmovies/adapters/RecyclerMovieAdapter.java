@@ -7,8 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.android.daniel.popmovies.Utils.Constants;
-import com.android.daniel.popmovies.Utils.OnItemClickListener;
+import com.android.daniel.popmovies.utils.Constants;
+import com.android.daniel.popmovies.utils.OnItemClickListener;
 import com.android.daniel.popmovies.R;
 import com.android.daniel.popmovies.models.Movie;
 import com.squareup.picasso.Picasso;

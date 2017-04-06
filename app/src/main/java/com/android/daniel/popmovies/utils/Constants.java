@@ -1,4 +1,4 @@
-package com.android.daniel.popmovies.Utils;
+package com.android.daniel.popmovies.utils;
 
 /**
  * Created by daniel on 23/03/2017.
@@ -19,6 +19,9 @@ public class Constants {
 
     public final static String RESULTS = "results";
     public final static String ID = "id";
+
+    public final static String PARCELABLE_MOVIE = "parcelable_movie";
+
     public final static String TITLE = "original_title";
     public final static String POSTER = "poster_path";
     public final static String OVERVIEW = "overview";

@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.daniel.popmovies.Utils.Constants;
+import com.android.daniel.popmovies.utils.Constants;
 import com.android.daniel.popmovies.R;
 import com.android.daniel.popmovies.models.Movie;
 import com.squareup.picasso.Picasso;
@@ -40,12 +40,8 @@ public class DetailActivity extends AppCompatActivity {
             // Getting the information through the intent
             Intent intent = getActivity().getIntent();
             if (intent != null) {
-                mMovie = new Movie();
-                mMovie.setmTitle(intent.getStringExtra(Constants.TITLE));
-                mMovie.setmPoster(intent.getStringExtra(Constants.POSTER));
-                mMovie.setmSynopsis(intent.getStringExtra(Constants.OVERVIEW));
-                mMovie.setmReleaseDate(intent.getStringExtra(Constants.RELEASE_DATE));
-                mMovie.setmVoteAverage(intent.getDoubleExtra(Constants.VOTE_AVERAGE, 0));
+                // Getting a Parcelable object
+                mMovie =  intent.getParcelableExtra(Constants.PARCELABLE_MOVIE);
             }
 
             // Setting up the views

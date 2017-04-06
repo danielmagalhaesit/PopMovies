@@ -1,4 +1,4 @@
-package com.android.daniel.popmovies.Utils;
+package com.android.daniel.popmovies.utils;
 
 import android.view.View;
 
