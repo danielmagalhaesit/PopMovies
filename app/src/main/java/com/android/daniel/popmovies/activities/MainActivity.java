@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,6 +37,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         loadMovie();
     }
 
@@ -79,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         final String unitPref = sharedPreferences.getString(getString(R.string.pref_sort_key)
                 , getString(R.string.pref_sort_default));
         if (NetworkUtil.isNetworkConnected(getApplicationContext())) {
-            MovieService movieService = new MovieService(getApplicationContext(), new MainActivity());
+            MovieService movieService = new MovieService(getApplicationContext(), MainActivity.this);
             movieService.execute(unitPref);
         } else {
             View view = findViewById(R.id.container);
@@ -102,10 +108,18 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             mMovieList = (ArrayList<Movie>) output;
         }
 
-        View view = findViewById(R.id.container);
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_movies);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_movies);
+
+        // Setting up the adapter
         mMovieAdapter = new RecyclerMovieAdapter(mMovieList, getApplicationContext());
         mRecyclerView.setAdapter(mMovieAdapter);
+        // Click event
+        mMovieAdapter.setClickListener(MainActivity.this);
+        // Setting up the layout manager
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(MainActivity.this, 2);
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        mRecyclerView.setHasFixedSize(true);
 
     }
 }
