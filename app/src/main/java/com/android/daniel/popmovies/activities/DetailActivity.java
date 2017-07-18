@@ -28,36 +28,4 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
-    public static class DetailFragment extends Fragment {
-
-        private Movie mMovie;
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-
-            // Getting the information through the intent
-            Intent intent = getActivity().getIntent();
-            if (intent != null) {
-                // Getting a Parcelable object
-                mMovie =  intent.getParcelableExtra(Constants.PARCELABLE_MOVIE);
-            }
-
-            // Setting up the views
-            ImageView imageViewPoster = (ImageView) rootView.findViewById(R.id.imageview_detail_poster);
-            Picasso.with(getActivity())
-                    .load(Constants.POSTER_BASE_URL_500 + mMovie.getmPoster())
-                    .into(imageViewPoster);
-            ((TextView) rootView.findViewById(R.id.textview_title)).setText(mMovie.getmTitle());
-            ((TextView) rootView.findViewById(R.id.textview_rating))
-                    .setText("" + mMovie.getmVoteAverage());
-            ((TextView) rootView.findViewById(R.id.textview_release_date)).setText(mMovie.getmReleaseDate());
-            ((TextView) rootView.findViewById(R.id.textview_overview)).setText(mMovie.getmSynopsis());
-
-            return rootView;
-        }
-    }
-
-
 }

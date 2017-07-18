@@ -3,8 +3,6 @@ package com.android.daniel.popmovies.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Calendar;
-
 /**
  * Created by daniel on 23/03/2017.
  */
@@ -16,9 +14,13 @@ public class Movie implements Parcelable {
     private int mId;
     private String mTitle;
     private String mPoster;
+    private String mBackdrop;
     private String mSynopsis;
     private String mReleaseDate;
     private double mVoteAverage;
+    private boolean mFavorite;
+    private boolean mIsPopular;
+    private boolean mIsTopRated;
 
     public Movie() {
     }
@@ -47,6 +49,14 @@ public class Movie implements Parcelable {
         this.mPoster =  mPoster;
     }
 
+    public String getmBackdrop() {
+        return mBackdrop;
+    }
+
+    public void setmBackdrop(String mBackdrop) {
+        this.mBackdrop = mBackdrop;
+    }
+
     public String getmSynopsis() {
         return mSynopsis;
     }
@@ -71,13 +81,41 @@ public class Movie implements Parcelable {
         this.mVoteAverage = mVoteAverage;
     }
 
+    public boolean ismFavorite() {
+        return mFavorite;
+    }
+
+    public void setmFavorite(boolean mFavorite) {
+        this.mFavorite = mFavorite;
+    }
+
+    public boolean getmIsPopular() {
+        return mIsPopular;
+    }
+
+    public void setmIsPopular(boolean mIsPopular) {
+        this.mIsPopular = mIsPopular;
+    }
+
+    public boolean getmIsTopRated() {
+        return mIsTopRated;
+    }
+
+    public void setmIsTopRated(boolean mIsTopRated) {
+        this.mIsTopRated = mIsTopRated;
+    }
+
     protected Movie(Parcel in) {
         mId = in.readInt();
         mTitle = in.readString();
         mPoster = in.readString();
+        mBackdrop = in.readString();
         mSynopsis = in.readString();
         mReleaseDate = in.readString();
         mVoteAverage = in.readDouble();
+        mFavorite = in.readByte() != 0;
+        mIsPopular = in.readByte() != 0;
+        mIsTopRated = in.readByte() != 0;
     }
 
     @Override
@@ -90,9 +128,13 @@ public class Movie implements Parcelable {
         dest.writeInt(mId);
         dest.writeString(mTitle);
         dest.writeString(mPoster);
+        dest.writeString(mBackdrop);
         dest.writeString(mSynopsis);
         dest.writeString(mReleaseDate);
         dest.writeDouble(mVoteAverage);
+        dest.writeByte((byte) (mFavorite? 1 :0));
+        dest.writeByte((byte) (mIsPopular? 1 :0));
+        dest.writeByte((byte) (mIsTopRated? 1 :0));
     }
 
     @SuppressWarnings("unused")

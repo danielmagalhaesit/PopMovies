@@ -23,6 +23,7 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.MainActivity" />
+
         </activity>
         <activity
             android:name=".activities.SettingsActivity"
@@ -31,6 +32,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.MainActivity" />
         </activity>
+        <provider
+            android:authorities="@string/content_authority"
+            android:name=".data.MovieProvider"
+            android:exported="true"
+            android:syncable="true" />
 
     </application>
 
