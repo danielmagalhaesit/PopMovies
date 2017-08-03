@@ -10,7 +10,6 @@ import android.widget.ImageView;
 
 import com.android.daniel.popmovies.R;
 import com.android.daniel.popmovies.data.MovieContract;
-import com.android.daniel.popmovies.models.Video;
 import com.android.daniel.popmovies.utils.Constants;
 import com.android.daniel.popmovies.utils.OnItemClickListener;
 import com.squareup.picasso.Picasso;
@@ -19,7 +18,7 @@ import com.squareup.picasso.Picasso;
  * Created by danie on 17/07/2017.
  */
 
-public class VideosCursorAdapter extends RecyclerVideoAdapter<VideosCursorAdapter.ViewHolder> {
+public class VideosCursorAdapter extends CursorRecyclerViewAdapter<VideosCursorAdapter.ViewHolder> {
 
     private Context mContext;
     private OnItemClickListener mItemClickListener;
@@ -60,6 +59,7 @@ public class VideosCursorAdapter extends RecyclerVideoAdapter<VideosCursorAdapte
         Picasso.with(mContext)
                 .load(thumbPath)
                 .into(viewHolder.mImageView);
+
     }
 
     public void setClickListener(OnItemClickListener itemClickListener) {

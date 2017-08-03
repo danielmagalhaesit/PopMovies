@@ -37,6 +37,7 @@
             android:name=".data.MovieProvider"
             android:exported="true"
             android:syncable="true" />
+        <service android:name=".service.PopMovieService"/>
 
     </application>
 

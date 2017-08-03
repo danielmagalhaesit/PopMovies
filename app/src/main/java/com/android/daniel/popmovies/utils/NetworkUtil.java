@@ -1,4 +1,4 @@
-package com.android.daniel.popmovies.networkTasks;
+package com.android.daniel.popmovies.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

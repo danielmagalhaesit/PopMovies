@@ -20,18 +20,22 @@
 
     <string name="pref_sort_by_label_popular" translatable="false">Popular</string>
     <string name="pref_sort_by_label_top_rated" translatable="false">Top Rated</string>
+    <string name="pref_sort_by_label_favorite" translatable="false">Favorite</string>
 
     <string-array name="pref_sort_by_label_array">
         <item>@string/pref_sort_by_label_popular</item>
         <item>@string/pref_sort_by_label_top_rated</item>
+        <item>@string/pref_sort_by_label_favorite</item>
     </string-array>
 
     <string name="pref_sort_by_value_popular">popular</string>
     <string name="pref_sort_by_value_top_rated">top_rated</string>
+    <string name="pref_sort_by_value_favorite">favorite</string>
 
     <string-array name="pref_sort_by_value_array">
         <item>@string/pref_sort_by_value_popular</item>
         <item>@string/pref_sort_by_value_top_rated</item>
+        <item>@string/pref_sort_by_value_favorite</item>
     </string-array>
 
     <string name="content_authority">com.android.daniel.popmovies</string>
@@ -40,6 +44,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="read_more">Read more</string>
     <string name="read_less">Read less</string>
+    <string name="read_reviews">Reviews</string>
+    <string name="trailers">Trailers</string>
 
 
 </resources>

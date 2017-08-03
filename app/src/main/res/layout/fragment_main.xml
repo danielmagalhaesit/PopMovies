@@ -4,8 +4,8 @@
     android:layout_height="match_parent"
     android:layout_margin="10dp"
     android:id="@+id/frame_main_fragment"
-    android:paddingTop="?attr/actionBarSize"
     tools:context="com.android.daniel.popmovies.activities.MainFragment">
+<!--android:paddingTop="?attr/actionBarSize"-->
 
     <GridView
         android:id="@+id/gridview_movies"
@@ -17,5 +17,6 @@
         android:horizontalSpacing="10dp"
         android:stretchMode="columnWidth"
         android:gravity="center"/>
+
 
 </FrameLayout>

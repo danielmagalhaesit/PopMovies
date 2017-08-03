@@ -1,17 +1,19 @@
-package com.android.daniel.popmovies.networkTasks;
+package com.android.daniel.popmovies.service;
 
+import android.app.IntentService;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.daniel.popmovies.BuildConfig;
 import com.android.daniel.popmovies.data.MovieContract;
+import com.android.daniel.popmovies.models.Movie;
 import com.android.daniel.popmovies.models.Review;
 import com.android.daniel.popmovies.models.Video;
 import com.android.daniel.popmovies.utils.Constants;
-import com.android.daniel.popmovies.models.Movie;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,20 +28,30 @@ import java.net.URL;
 import java.util.Vector;
 
 /**
- * Created by daniel on 30/03/2017.
+ * Created by danie on 02/08/2017.
  */
 
-public class MovieService extends AsyncTask <String, Void, Void> {
+public class PopMovieService extends IntentService {
 
-    private static final String LOG_TAG = MovieService.class.getSimpleName();
-    private Context mContext;
 
-    public MovieService(Context context) {
-        mContext = context;
+    private static final String LOG_TAG = PopMovieService.class.getSimpleName();
+    /**
+     * Creates an IntentService.  Invoked by your subclass's constructor.
+     */
+    public PopMovieService() {
+        super("PopMovieService");
     }
 
     @Override
-    protected Void doInBackground(String... params) {
+    protected void onHandleIntent(@Nullable Intent intent) {
+
+        String movieOrVideo = intent.getStringExtra(Constants.MOVIE_OR_VIDEO);
+        String sortBy = intent.getStringExtra(Constants.SORT_BY);
+        String idMovieDb = intent.getStringExtra(Constants.MOVIE_DB_ID);
+        String idMovieDatabase = intent.getStringExtra(Constants.MOVIE_ID);
+
+
+
         /*
         * param[o] = movie, video or review
         * param[1] = popular or top_rated
@@ -55,24 +67,24 @@ public class MovieService extends AsyncTask <String, Void, Void> {
             String moviesJsonStr = null;
             Uri builtUri = null;
 
-            switch (params[0]) {
+            switch (movieOrVideo) {
                 case Constants.MOVIE: {
                     builtUri = Uri.parse(Constants.MOVIE_BASE_URL).buildUpon()
-                            .appendEncodedPath(params[1])
+                            .appendEncodedPath(sortBy)
                             .appendQueryParameter(Constants.API_KEY, BuildConfig.THE_MOVIE_DB_API_KEY)
                             .build();
-                    setMoviesFromJson(getJSON(builtUri), params[1]);
+                    setMoviesFromJson(getJSON(builtUri), sortBy);
                     break;
                 }
                 case Constants.VIDEO: {
 
-                    String uriString = Constants.MOVIE_BASE_URL + params[2] + "/videos?" + Constants.API_KEY + "=" + BuildConfig.THE_MOVIE_DB_API_KEY;
+                    String uriString = Constants.MOVIE_BASE_URL + idMovieDb + "/videos?" + Constants.API_KEY + "=" + BuildConfig.THE_MOVIE_DB_API_KEY;
                     builtUri = Uri.parse(uriString);
-                    setVideosFromJson(getJSON(builtUri), params[3]);
+                    setVideosFromJson(getJSON(builtUri), idMovieDatabase);
 
-                    uriString = Constants.MOVIE_BASE_URL + params[2] + "/reviews?" + Constants.API_KEY + "=" + BuildConfig.THE_MOVIE_DB_API_KEY;
+                    uriString = Constants.MOVIE_BASE_URL + idMovieDb + "/reviews?" + Constants.API_KEY + "=" + BuildConfig.THE_MOVIE_DB_API_KEY;
                     builtUri = Uri.parse(uriString);
-                    setReviewsFromJson(getJSON(builtUri), params[3]);
+                    setReviewsFromJson(getJSON(builtUri), idMovieDatabase);
 
 
 //                builtUri = Uri.parse(Constants.MOVIE_BASE_URL).buildUpon()
@@ -84,10 +96,10 @@ public class MovieService extends AsyncTask <String, Void, Void> {
                     break;
                 }
             }
-            return null;
+            return;
         } catch (Exception e){
             e.printStackTrace();
-            return null;
+            return;
         }
     }
 
@@ -98,51 +110,51 @@ public class MovieService extends AsyncTask <String, Void, Void> {
 
         try {
 
-        URL url = new URL(uriGetJson.toString());
+            URL url = new URL(uriGetJson.toString());
 
-        Log.v(LOG_TAG, "Built URI Video " + uriGetJson.toString());
+            Log.v(LOG_TAG, "Built URI Video " + uriGetJson.toString());
 
-        // Create the request and open the connection
-        urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestMethod("GET");
-        urlConnection.connect();
+            // Create the request and open the connection
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
 
-        // Read the input stream into a String
-        InputStream inputStream = urlConnection.getInputStream();
-        StringBuffer buffer = new StringBuffer();
-        if (inputStream == null) {
+            // Read the input stream into a String
+            InputStream inputStream = urlConnection.getInputStream();
+            StringBuffer buffer = new StringBuffer();
+            if (inputStream == null) {
+                return null;
+            }
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line + "\n");
+            }
+
+            if (buffer.length() == 0) {
+                return null;
+            }
+
+            jsonString = buffer.toString();
+
+            Log.v(LOG_TAG, "Json String: " + jsonString);
+
+        } catch (RuntimeException | IOException e) {
+            Log.e(LOG_TAG, "Error ", e);
             return null;
-        }
-        reader = new BufferedReader(new InputStreamReader(inputStream));
-
-        String line;
-        while ((line = reader.readLine()) != null) {
-            buffer.append(line + "\n");
-        }
-
-        if (buffer.length() == 0) {
-            return null;
-        }
-
-        jsonString = buffer.toString();
-
-        Log.v(LOG_TAG, "Json String: " + jsonString);
-
-    } catch (RuntimeException | IOException e) {
-        Log.e(LOG_TAG, "Error ", e);
-        return null;
-    } finally {
-        if (urlConnection != null) {
-            urlConnection.disconnect();
-        }
-        if (reader != null) {
-            try {
-                reader.close();
-            } catch (final IOException e) {
-                Log.e(LOG_TAG, "Error closing stream", e);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    Log.e(LOG_TAG, "Error closing stream", e);
+                }
             }
         }
-    }
         return jsonString;
     }
 
@@ -192,7 +204,7 @@ public class MovieService extends AsyncTask <String, Void, Void> {
             if ( cVVectorMovie.size() > 0 ) {
                 ContentValues[] cvArray = new ContentValues[cVVectorMovie.size()];
                 cVVectorMovie.toArray(cvArray);
-                inserted = mContext.getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
+                inserted = this.getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
             }
 
             Log.d(LOG_TAG, "Movies Complete. " + inserted + " Inserted");
@@ -230,7 +242,7 @@ public class MovieService extends AsyncTask <String, Void, Void> {
             if ( cVVectorVideo.size() > 0 ) {
                 ContentValues[] cvArray = new ContentValues[cVVectorVideo.size()];
                 cVVectorVideo.toArray(cvArray);
-                inserted = mContext.getContentResolver().bulkInsert(MovieContract.VideoEntry.CONTENT_URI, cvArray);
+                inserted = this.getContentResolver().bulkInsert(MovieContract.VideoEntry.CONTENT_URI, cvArray);
             }
 
             Log.d(LOG_TAG, "Videos Complete. " + inserted + " Inserted");
@@ -270,7 +282,7 @@ public class MovieService extends AsyncTask <String, Void, Void> {
             if ( cVVectorVideo.size() > 0 ) {
                 ContentValues[] cvArray = new ContentValues[cVVectorVideo.size()];
                 cVVectorVideo.toArray(cvArray);
-                inserted = mContext.getContentResolver().bulkInsert(MovieContract.ReviewEntry.CONTENT_URI, cvArray);
+                inserted = this.getContentResolver().bulkInsert(MovieContract.ReviewEntry.CONTENT_URI, cvArray);
             }
 
             Log.d(LOG_TAG, "Reviews Complete. " + inserted + " Inserted");
@@ -280,5 +292,6 @@ public class MovieService extends AsyncTask <String, Void, Void> {
             Log.e(LOG_TAG, e.getMessage(), e);
         }
     }
+
 
 }

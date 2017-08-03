@@ -17,8 +17,12 @@ public class Constants {
 
     public final static String YOUTUBE_THUMB = "http://img.youtube.com/vi/";
     public final static String YOUTUBE_VIDEO_URL = "http://www.youtube.com/watch?v=";
+//    "https://www.youtube.com/embed/"
 
     public final static String API_KEY = "api_key";
+
+    public final static String MOVIE_ID = "movie_id";
+    public final static String MOVIE_DB_ID = "movie_db_id";
 
     public final static String RESULTS = "results";
     public final static String ID = "id";
@@ -42,4 +46,6 @@ public class Constants {
     public static final String VIDEO_KEY = "key";
     public static final java.lang.String REVIEW_CONTENT = "content";
     public static final java.lang.String REVIEW_AUTHOR = "author";
+    public static final String MOVIE_OR_VIDEO = "movie_or_video";
+    public static final String SORT_BY = "sort_by";
 }

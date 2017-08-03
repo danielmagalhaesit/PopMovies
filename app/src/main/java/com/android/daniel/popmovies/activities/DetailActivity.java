@@ -21,11 +21,20 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container_detail, new DetailFragment())
-                    .commit();
-        }
+
+        // Create the detail fragment and add it to the activity
+        // using a fragment transaction.
+
+        Bundle arguments = new Bundle();
+        arguments.putLong(Constants.MOVIE_ID, getIntent().getExtras().getLong(Constants.MOVIE_ID, 0 ));
+        arguments.putLong(Constants.MOVIE_DB_ID, getIntent().getExtras().getLong(Constants.MOVIE_DB_ID, 0 ));
+
+        DetailFragment fragment = new DetailFragment();
+        fragment.setArguments(arguments);
+
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.container_detail, fragment)
+                .commit();
     }
 
 }

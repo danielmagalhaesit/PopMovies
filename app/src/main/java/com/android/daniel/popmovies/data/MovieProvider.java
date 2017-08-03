@@ -54,13 +54,14 @@ public class MovieProvider extends ContentProvider {
     static{
         sReviewByMovieIdQueryBuilder = new SQLiteQueryBuilder();
 
-        sReviewByMovieIdQueryBuilder.setTables(
-                MovieContract.ReviewEntry.TABLE_NAME + " LEFT JOIN " +
-                        MovieContract.MovieEntry.TABLE_NAME +
-                        " ON " + MovieContract.ReviewEntry.TABLE_NAME +
-                        "." + MovieContract.ReviewEntry.COLUMN_MOVIE_KEY +
-                        " = " + MovieContract.MovieEntry.TABLE_NAME +
-                        "." + MovieContract.MovieEntry._ID);
+//        sReviewByMovieIdQueryBuilder.setTables(
+//                MovieContract.ReviewEntry.TABLE_NAME + " LEFT JOIN " +
+//                        MovieContract.MovieEntry.TABLE_NAME +
+//                        " ON " + MovieContract.ReviewEntry.TABLE_NAME +
+//                        "." + MovieContract.ReviewEntry.COLUMN_MOVIE_KEY +
+//                        " = " + MovieContract.MovieEntry.TABLE_NAME +
+//                        "." + MovieContract.MovieEntry._ID);
+        sReviewByMovieIdQueryBuilder.setTables(MovieContract.ReviewEntry.TABLE_NAME);
     }
 
     private static final SQLiteQueryBuilder sReviewAndVideoByMovieIdQueryBuilder;
@@ -102,8 +103,7 @@ public class MovieProvider extends ContentProvider {
                     "." + MovieContract.ReviewEntry._ID + " = ? ";
 
     private static final String sMovieSelectionInReviewTable =
-            MovieContract.MovieEntry.TABLE_NAME +
-                    "." + MovieContract.ReviewEntry.COLUMN_MOVIE_KEY + " = ? ";
+            MovieContract.ReviewEntry.COLUMN_MOVIE_KEY + " = ? ";
 
     private static final String sMovieTypeSelection =
 //            MovieContract.MovieEntry.TABLE_NAME +
@@ -164,7 +164,7 @@ public class MovieProvider extends ContentProvider {
 
     private Cursor getReviewsByMovieId(
             Uri uri, String[] projection, String sortOrder) {
-        String movieIdFromUri = MovieContract.ReviewEntry.getMovieIdFromUri(uri);
+        String movieIdFromUri = MovieContract.ReviewEntry.getMovieIdFromReviewUri(uri);
 
         Cursor cursor = sReviewByMovieIdQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
@@ -174,6 +174,10 @@ public class MovieProvider extends ContentProvider {
                 null,
                 sortOrder
         );
+
+        cursor.moveToFirst();
+        String strCursor = DatabaseUtils.dumpCursorToString(cursor);
+        Log.v("Reviews by Id Cursor",strCursor );
 
         return cursor;
     }

@@ -10,8 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,14 +23,11 @@ import android.widget.GridView;
 import com.android.daniel.popmovies.R;
 import com.android.daniel.popmovies.adapters.CursorMovieAdapter;
 import com.android.daniel.popmovies.data.MovieContract;
-import com.android.daniel.popmovies.networkTasks.MovieService;
-import com.android.daniel.popmovies.networkTasks.NetworkUtil;
+import com.android.daniel.popmovies.utils.NetworkUtil;
+import com.android.daniel.popmovies.service.PopMovieService;
 import com.android.daniel.popmovies.utils.Constants;
 import com.android.daniel.popmovies.utils.Utility;
 
-/**
- * Encapsulates fetching the forecast and displaying it as a {@link GridView} layout.
- */
 
 public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -41,6 +36,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     private GridView mGridView;
 
     private static final int MOVIE_LOADER = 0;
+    private static final int FAVORITES_LOADER = 1;
 
     private static final String SELECTED_KEY = "selected_position";
     private int mPosition = GridView.INVALID_POSITION;
@@ -72,6 +68,9 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             startActivity(intent);
             return true;
         }
+        if(id == R.id.action_favorite_list){
+            getLoaderManager().restartLoader(FAVORITES_LOADER, null, this);
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -95,21 +94,17 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Cursor cursor = (Cursor) parent.getItemAtPosition(position);
-//                cursor.moveToFirst();
                 Log.v("ClickEvent MainFragment", DatabaseUtils.dumpCursorToString(cursor));
                 if (cursor != null) {
-                    long movieId = cursor.getLong(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
-                    Intent intent = new Intent(getActivity(), DetailActivity.class)
-                            .putExtra("uri_id", id)
-                            .putExtra("id_movie_db", movieId);
-                    startActivity(intent);
+                    long movieDbId = cursor.getLong(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
+                    ((Callback) getActivity())
+                            .onItemSelected(id, movieDbId);
                 }
+                mPosition = position;
             }
         });
 
-        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY))
-
-        {
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
             // The listview probably hasn't even been populated yet.  Actually perform the
             // swapout in onLoadFinished.
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
@@ -124,6 +119,14 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         super.onActivityCreated(savedInstanceState);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if(mPosition != GridView.INVALID_POSITION){
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
+        super.onSaveInstanceState(outState);
+    }
+
     private void loadMovie() {
         final String sortBy = Utility.getSortBy(getActivity());
         /*
@@ -133,8 +136,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         * param[3] = ID movie database
         */
         if (NetworkUtil.isNetworkConnected(getActivity())) {
-            MovieService movieService = new MovieService(getActivity());
-            movieService.execute(Constants.MOVIE, sortBy, null, null);
+            Intent intent = new Intent(getActivity(), PopMovieService.class);
+            intent.putExtra(Constants.MOVIE_OR_VIDEO, Constants.MOVIE);
+            intent.putExtra(Constants.SORT_BY, sortBy);
+            getActivity().startService(intent);
         } else {
             View view = getActivity().findViewById(R.id.frame_main_fragment);
             Snackbar snackbar = Snackbar.make(view, getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
@@ -152,12 +157,30 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     void onSortByChanged() {
         loadMovie();
         getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
+        getLoaderManager().destroyLoader(FAVORITES_LOADER);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortBy = Utility.getSortBy(getActivity());
+        String sortBy;
 
+        switch (id){
+            case MOVIE_LOADER:
+            {
+                sortBy = Utility.getSortBy(getActivity());
+                break;
+            }
+            case FAVORITES_LOADER:
+            {
+                sortBy = "favorite";
+                break;
+            }
+            default:
+            {
+                sortBy = "popular";
+                break;
+            }
+        }
 
         CursorLoader cursorLoader = new CursorLoader(getActivity(),
                 MovieContract.MovieEntry.buildMoviePopTopFavUri(sortBy),
@@ -167,6 +190,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                 null);
 
         return cursorLoader;
+
     }
 
     @Override
@@ -176,6 +200,19 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 //        Log.v("Cursor LoadFinish", DatabaseUtils.dumpCursorToString(cursor));
 
         mMovieAdapter.swapCursor(cursor);
+
+        if(mPosition != GridView.INVALID_POSITION){
+            mGridView.setSelection(mPosition);
+        }else {
+//            mGridView.setSelection(0);
+//            mGridView.getSelectedView().setSelected(true);
+//            cursor.moveToPosition(0);
+//            long movieId = cursor.getLong(cursor.getColumnIndex(MovieContract.MovieEntry._ID));
+//            long movieDbId = cursor.getLong(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
+//            ((Callback) getActivity())
+//                    .onItemSelected(movieId, movieDbId);
+        }
+
     }
 
     @Override
@@ -193,4 +230,11 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
+
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(long idMovie, long movieDbId);
+    }
 }
