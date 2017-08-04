@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import com.android.daniel.popmovies.R;
+import com.android.daniel.popmovies.sync.PopMovieSyncAdapter;
 import com.android.daniel.popmovies.utils.Constants;
 import com.android.daniel.popmovies.utils.Utility;
 
@@ -54,11 +55,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
             if (mf != null) {
                 mf.onSortByChanged();
             }
-//            DetailFragment df = (DetailFragment)getSupportFragmentManager().findFragmentByTag(DETAIL_FRAGMENT_TAG);
-//            if(null != df){
-//                df.onSortByChanged();
-//            }
-//            mSortBy = sortBy;
         }
     }
 
@@ -84,19 +80,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
                     .putExtra(Constants.MOVIE_DB_ID, movieDbId);
             startActivity(intent);
         }
+
+        PopMovieSyncAdapter.initializeSyncAdapter(this);
     }
 }
 
-    //    @Override
-//    public void onClick(View view, int position) {
-//        // Click event sending the movie information through the intent
-//        try {
-//            Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
-//            // Passing a Parcelable object.
-//            intent.putExtra(Constants.PARCELABLE_MOVIE, mMovieList.get(position));
-//            startActivity(intent);
-//        } catch (Exception e) {
-//            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-//        }
-//    }
 

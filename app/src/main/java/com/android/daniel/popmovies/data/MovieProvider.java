@@ -54,13 +54,6 @@ public class MovieProvider extends ContentProvider {
     static{
         sReviewByMovieIdQueryBuilder = new SQLiteQueryBuilder();
 
-//        sReviewByMovieIdQueryBuilder.setTables(
-//                MovieContract.ReviewEntry.TABLE_NAME + " LEFT JOIN " +
-//                        MovieContract.MovieEntry.TABLE_NAME +
-//                        " ON " + MovieContract.ReviewEntry.TABLE_NAME +
-//                        "." + MovieContract.ReviewEntry.COLUMN_MOVIE_KEY +
-//                        " = " + MovieContract.MovieEntry.TABLE_NAME +
-//                        "." + MovieContract.MovieEntry._ID);
         sReviewByMovieIdQueryBuilder.setTables(MovieContract.ReviewEntry.TABLE_NAME);
     }
 
@@ -72,19 +65,6 @@ public class MovieProvider extends ContentProvider {
         sReviewAndVideoByMovieIdQueryBuilder.setTables(
                 "movie LEFT JOIN video ON movie._id = video.movie_id LEFT JOIN review ON movie._id = review.movie_id");
     }
-
-    /*
-    * review INNER JOIN movie ON review.movie_id = movie._id
-    *
-    * movie INNER JOIN video ON movie._id = video.movie_id
-    * inner join review ON movie._id = review.movie_id
-    *
-    * */
-
-    /*Songs
- LEFT JOIN Artists ON Songs.artist_id = Artists._id
- LEFT JOIN Albums ON Songs.album_id = Albums._id*/
-
 
     private static final String sMovieSelection =
             MovieContract.MovieEntry.TABLE_NAME +
@@ -106,8 +86,6 @@ public class MovieProvider extends ContentProvider {
             MovieContract.ReviewEntry.COLUMN_MOVIE_KEY + " = ? ";
 
     private static final String sMovieTypeSelection =
-//            MovieContract.MovieEntry.TABLE_NAME +
-//                    "." +
                     MovieContract.MovieEntry.COLUMN_POPULAR + " = ? ";
 
     private static final String sFavoriteMovieSelection =
@@ -199,22 +177,6 @@ public class MovieProvider extends ContentProvider {
         return cursor;
     }
 
-    private Cursor getMovieById(Uri uri, String[] projection, String sortOrder) {
-        String movieIdFromUri = MovieContract.MovieEntry.getIdFromUri(uri);
-
-        Cursor cursor = mOpenHelper.getReadableDatabase().query(
-                MovieContract.MovieEntry.TABLE_NAME,
-                projection,
-                sMovieSelection,
-                new String[]{movieIdFromUri},
-                null,
-                null,
-                sortOrder
-        );
-
-        return cursor;
-    }
-
     private Cursor getVideoById(Uri uri, String[] projection, String sortOrder) {
         String videoFromUri = MovieContract.VideoEntry.getIdFromUri(uri);
 
@@ -245,44 +207,7 @@ public class MovieProvider extends ContentProvider {
         return cursor;
     }
 
-    private Cursor getMovieListByType(Uri uri, String[] projection,String sortOrder) {
-        String typeIdFromUri = MovieContract.MovieEntry.getTypeFromUri(uri);
 
-        Cursor cursor =mOpenHelper.getReadableDatabase().query(
-                MovieContract.MovieEntry.TABLE_NAME,
-                projection,
-                sMovieTypeSelection,
-                new String[]{typeIdFromUri},
-                null,
-                null,
-                sortOrder
-        );
-
-        cursor.moveToFirst();
-        Log.v("Cursor Object", DatabaseUtils.dumpCursorToString(cursor));
-
-        return cursor;
-
-
-    }
-
-    private Cursor getFavoriteMovieList(Uri uri, String[] projection, String sortOrder) {
-        String typeIdFromUri = MovieContract.MovieEntry.getTypeFromUri(uri);
-
-        final String isFavorite = "1";
-
-        Cursor cursor = mOpenHelper.getReadableDatabase().query(
-                MovieContract.MovieEntry.TABLE_NAME,
-                projection,
-                sFavoriteMovieSelection,
-                new String[]{isFavorite},
-                null,
-                null,
-                sortOrder
-        );
-
-        return cursor;
-    }
 
     @Override
     public boolean onCreate() {
@@ -313,19 +238,16 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case MOVIE_FAVORITE: {
-//                retCursor = getFavoriteMovieList(uri,projection,sortOrder);
                 retCursor = mOpenHelper.getReadableDatabase().
                         rawQuery("SELECT * FROM movie WHERE favorite = '1'", null);
                 break;
             }
             case MOVIE_POPULAR: {
-//                retCursor = getMovieListByType(uri,projection,sortOrder);
                 retCursor = mOpenHelper.getReadableDatabase().
                         rawQuery("SELECT * FROM movie WHERE popular = '1'", null);
                 break;
             }
             case MOVIE_TOP_RATED: {
-//                retCursor = getMovieListByType(uri,projection,sortOrder);
                 retCursor = mOpenHelper.getReadableDatabase().
                         rawQuery("SELECT * FROM movie WHERE top_rated = '1'", null);
                 break;
@@ -393,7 +315,6 @@ public class MovieProvider extends ContentProvider {
 
         String uriReturnType = null;
         switch (match) {
-            // Student: Uncomment and fill out these two cases
             case MOVIE:{
                 uriReturnType = MovieContract.MovieEntry.CONTENT_TYPE;
                 break;

@@ -60,7 +60,6 @@ public class MovieContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-
         public static Uri buildMoviePopTopFavUri(String type) {
             Uri uriResult = CONTENT_URI.buildUpon().appendPath(type).build();
             return uriResult;
@@ -74,11 +73,6 @@ public class MovieContract {
             return uri.getPathSegments().get(1);
         }
 
-
-
-//        public static Uri buildMovie(long testMovieId) {
-//            return CONTENT_URI.buildUpon().appendPath(Long.toString(testMovieId)).build();
-//        }
     }
 
     public static final class VideoEntry implements BaseColumns{

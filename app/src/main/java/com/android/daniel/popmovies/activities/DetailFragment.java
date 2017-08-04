@@ -28,6 +28,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.daniel.popmovies.R;
 import com.android.daniel.popmovies.adapters.ReviewsCursorAdapter;
@@ -35,9 +36,9 @@ import com.android.daniel.popmovies.adapters.VideosCursorAdapter;
 import com.android.daniel.popmovies.data.MovieContract;
 import com.android.daniel.popmovies.data.MovieContract.MovieEntry;
 import com.android.daniel.popmovies.data.MovieContract.VideoEntry;
-import com.android.daniel.popmovies.utils.NetworkUtil;
-import com.android.daniel.popmovies.service.PopMovieService;
+import com.android.daniel.popmovies.sync.PopMovieSyncAdapter;
 import com.android.daniel.popmovies.utils.Constants;
+import com.android.daniel.popmovies.utils.NetworkUtil;
 import com.android.daniel.popmovies.utils.OnItemClickListener;
 import com.squareup.picasso.Picasso;
 
@@ -97,7 +98,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView mTextViewTitle;
     private TextView mTextViewSynopsis;
     private TextView mTextViewReleaseDate;
-    private TextView mTextViewRating;
     private TextView mTextViewReadMore;
     private RecyclerView mRecyclerViewVideos;
     private RecyclerView mRecyclerViewReviews;
@@ -108,26 +108,27 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onStart() {
         super.onStart();
-        // Getting the information through the intent
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+//       This came from the two pane mode
         Bundle arguments = getArguments();
         if (arguments != null) {
             mMovie_id = arguments.getLong(Constants.MOVIE_ID);
             mIdMovieDB = arguments.getLong(Constants.MOVIE_DB_ID);
         }
 
-        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-
+//        This came from the one pane mode through intent.
         Intent intent = getActivity().getIntent();
         if (intent != null && intent.hasExtra(Constants.MOVIE_DB_ID) && intent.hasExtra(Constants.MOVIE_ID)) {
             mMovie_id = intent.getLongExtra(Constants.MOVIE_ID, 0);
             mIdMovieDB = intent.getLongExtra(Constants.MOVIE_DB_ID, 0);
         }
+
+        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
         // Setting up the views
 
@@ -135,37 +136,35 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mCollapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
 
         mImageViewBackdrop = (ImageView) rootView.findViewById(R.id.header_image);
+
+//        Checking if is in two pane layout.
+//        In two pane layout there is no poster.
         if (rootView.findViewById(R.id.imageview_detail_poster) != null){
             mImageViewPoster = (ImageView) rootView.findViewById(R.id.imageview_detail_poster);
         }
         mTextViewTitle = (TextView) rootView.findViewById(R.id.textview_title);
-//        mTextViewRating = (TextView) rootView.findViewById(R.id.textview_rating);
         mRatingBar = (RatingBar) rootView.findViewById(R.id.rating_id);
         mTextViewReleaseDate = (TextView) rootView.findViewById(R.id.textview_release_date);
         mTextViewSynopsis = (TextView) rootView.findViewById(R.id.textview_overview);
         mTextViewReadMore = (TextView) rootView.findViewById(R.id.tv_read_more);
         mFab = (FloatingActionButton) rootView.findViewById(R.id.fab);
 
+//        Horizontal RecyclerView to show the trailers
         mRecyclerViewVideos = (RecyclerView) rootView.findViewById(R.id.recycler_view_videos);
-
         mVideosAdapter = new VideosCursorAdapter(getContext(), null);
-
         mRecyclerViewVideos.setHasFixedSize(true);
         LinearLayoutManager videosLayoutManager = new LinearLayoutManager(getActivity());
-
         videosLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         if (mRecyclerViewVideos != null) {
             mRecyclerViewVideos.setAdapter(mVideosAdapter);
         }
         mRecyclerViewVideos.setLayoutManager(videosLayoutManager);
 
+//        RecyclerView to show reviews
         mRecyclerViewReviews = (RecyclerView) rootView.findViewById(R.id.recycler_view_reviews);
-
         mReviewsCursorAdapter = new ReviewsCursorAdapter(getContext(), null);
-
         mRecyclerViewReviews.setHasFixedSize(true);
         LinearLayoutManager reviewsLayoutManager = new LinearLayoutManager(getActivity());
-
         reviewsLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         if (mRecyclerViewReviews != null) {
             mRecyclerViewReviews.setAdapter(mReviewsCursorAdapter);
@@ -193,6 +192,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (intent == null) {
             return null;
         }
+
+//       Two loaders
+//       MOVIE_VIDEO_LOADER brings the movie details and trailers list
+//       REVIEW_LOADER brings the reviews list
 
         switch (id) {
             case MOVIE_VIDEO_LOADER: {
@@ -234,6 +237,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (!cursorValid) {
             return;
         }
+
+//        Populating view according to the loader.
         switch (loader.getId()) {
             case MOVIE_VIDEO_LOADER: {
                 mVideosAdapter.swapCursor(cursor);
@@ -251,24 +256,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             .into(mImageViewPoster);
                 }
 
-
                 ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
                 ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
                 actionBar.setDisplayHomeAsUpEnabled(true);
 
                 mCollapsingToolbarLayout.setTitle(cursor.getString(COL_TITLE));
-
                 mCursorVideos = cursor;
-
                 mTextViewTitle.setText(cursor.getString(COL_TITLE));
-//                mTextViewRating.setText(cursor.getString(COL_VOTE_AVERAGE));
-//                float rating = ((cursor.getFloat(COL_VOTE_AVERAGE) * 2))/10;
-                float rating = cursor.getFloat(COL_VOTE_AVERAGE);
                 mRatingBar.setRating(cursor.getFloat(COL_VOTE_AVERAGE)/2);
                 mTextViewReleaseDate.setText(cursor.getString(COL_RELEASE_DATE));
                 mTextViewSynopsis.setText(cursor.getString(COL_SYNOPSIS));
-                mTextViewSynopsis.setMaxLines(4);
 
+//                Checking if the synopsis is large to show the Read More button.
+                if (mTextViewSynopsis.getLineCount() <= 4){
+                    mTextViewReadMore.setVisibility(View.INVISIBLE);
+                }
+                mTextViewSynopsis.setMaxLines(4);
                 mTextViewReadMore.setOnClickListener(new View.OnClickListener() {
                     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
                     @Override
@@ -284,6 +287,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     }
                 });
 
+//                Favorite button
                 if(cursor.getInt(COL_FAVORITE) == 0){
                     mFab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_action_heart_gray));
                 }else{
@@ -300,9 +304,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         if(cursor.getInt(COL_FAVORITE) == 0){
                             contentValues.put(MovieEntry.COLUMN_FAVORITE, 1);
                             mFab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_action_heart_white));
+                            Toast.makeText(getActivity(), R.string.marked_as_favorite, Toast.LENGTH_SHORT).show();
                         }else{
                             contentValues.put(MovieEntry.COLUMN_FAVORITE, 0);
                             mFab.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_action_heart_gray));
+                            Toast.makeText(getActivity(), R.string.removed_from_favorite_list, Toast.LENGTH_SHORT).show();
                         }
                         getContext().getContentResolver().update(MovieEntry.CONTENT_URI, contentValues, MovieEntry.COLUMN_MOVIE_ID + "=?", new String[]{movieDbIdString});
                         contentValues.clear();
@@ -320,26 +326,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
         mVideosAdapter.swapCursor(null);
         mReviewsCursorAdapter.swapCursor(null);
 
     }
 
     private void loadVideoAndReview(final String idMovieDB, final String idDatabaseMovie) {
-        /*
-        * param[o] = movie, video or review
-        * param[1] = popular or top_rated
-        * param[2] = ID from movieDB
-        * param[3] = ID movie database
-        */
         if (NetworkUtil.isNetworkConnected(getActivity())) {
 
-            Intent intent = new Intent(getActivity(), PopMovieService.class);
-            intent.putExtra(Constants.MOVIE_OR_VIDEO, Constants.VIDEO);
-            intent.putExtra(Constants.MOVIE_DB_ID, idMovieDB);
-            intent.putExtra(Constants.MOVIE_ID, idDatabaseMovie);
-            getActivity().startService(intent);        } else {
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.MOVIE_DB_ID, idMovieDB);
+            bundle.putString(Constants.MOVIE_ID, idDatabaseMovie);
+            bundle.putString(Constants.MOVIE_OR_VIDEO, Constants.VIDEO);
+
+            PopMovieSyncAdapter.syncImmediately(getActivity(), bundle);
+        }
+        else {
             View view = getActivity().findViewById(R.id.frame_main_fragment);
             Snackbar snackbar = Snackbar.make(view, getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
             snackbar.setAction(getString(R.string.retry), new View.OnClickListener() {
@@ -353,6 +355,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
+//    Click event in trailers list.
     @Override
     public void onClick(View view, int position) {
         if (mCursorVideos != null) {
@@ -364,8 +367,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 e.printStackTrace();
             }
         }
-
-
     }
 
 }

@@ -23,9 +23,9 @@ import android.widget.GridView;
 import com.android.daniel.popmovies.R;
 import com.android.daniel.popmovies.adapters.CursorMovieAdapter;
 import com.android.daniel.popmovies.data.MovieContract;
-import com.android.daniel.popmovies.utils.NetworkUtil;
-import com.android.daniel.popmovies.service.PopMovieService;
+import com.android.daniel.popmovies.sync.PopMovieSyncAdapter;
 import com.android.daniel.popmovies.utils.Constants;
+import com.android.daniel.popmovies.utils.NetworkUtil;
 import com.android.daniel.popmovies.utils.Utility;
 
 
@@ -105,8 +105,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         });
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
-            // The listview probably hasn't even been populated yet.  Actually perform the
-            // swapout in onLoadFinished.
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
 
@@ -128,18 +126,11 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private void loadMovie() {
-        final String sortBy = Utility.getSortBy(getActivity());
-        /*
-        * param[o] = movie, video or review
-        * param[1] = popular or top_rated
-        * param[2] = ID from movieDB
-        * param[3] = ID movie database
-        */
+
         if (NetworkUtil.isNetworkConnected(getActivity())) {
-            Intent intent = new Intent(getActivity(), PopMovieService.class);
-            intent.putExtra(Constants.MOVIE_OR_VIDEO, Constants.MOVIE);
-            intent.putExtra(Constants.SORT_BY, sortBy);
-            getActivity().startService(intent);
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.MOVIE_OR_VIDEO, Constants.MOVIE);
+            PopMovieSyncAdapter.syncImmediately(getActivity());
         } else {
             View view = getActivity().findViewById(R.id.frame_main_fragment);
             Snackbar snackbar = Snackbar.make(view, getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
@@ -203,14 +194,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
         if(mPosition != GridView.INVALID_POSITION){
             mGridView.setSelection(mPosition);
-        }else {
-//            mGridView.setSelection(0);
-//            mGridView.getSelectedView().setSelected(true);
-//            cursor.moveToPosition(0);
-//            long movieId = cursor.getLong(cursor.getColumnIndex(MovieContract.MovieEntry._ID));
-//            long movieDbId = cursor.getLong(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
-//            ((Callback) getActivity())
-//                    .onItemSelected(movieId, movieDbId);
         }
 
     }
@@ -225,10 +208,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
      */
 
     public interface Callback {

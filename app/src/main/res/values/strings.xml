@@ -25,7 +25,6 @@
     <string-array name="pref_sort_by_label_array">
         <item>@string/pref_sort_by_label_popular</item>
         <item>@string/pref_sort_by_label_top_rated</item>
-        <item>@string/pref_sort_by_label_favorite</item>
     </string-array>
 
     <string name="pref_sort_by_value_popular">popular</string>
@@ -35,7 +34,6 @@
     <string-array name="pref_sort_by_value_array">
         <item>@string/pref_sort_by_value_popular</item>
         <item>@string/pref_sort_by_value_top_rated</item>
-        <item>@string/pref_sort_by_value_favorite</item>
     </string-array>
 
     <string name="content_authority">com.android.daniel.popmovies</string>
@@ -47,5 +45,10 @@
     <string name="read_reviews">Reviews</string>
     <string name="trailers">Trailers</string>
 
+    <!-- Account type (for sync-adapter authenticator) -->
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">popmovie.daniel.com</string>
+    <string name="marked_as_favorite">The movie is marked as favorite</string>
+    <string name="removed_from_favorite_list">The movie is no longer marked as favorite</string>
 
 </resources>
