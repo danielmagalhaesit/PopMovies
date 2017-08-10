@@ -12,9 +12,18 @@
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_action_heart_white"/>
 
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:orderInCategory="100"
-        app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_sort"/>
+    <item
+        android:id="@+id/action_popular_list"
+        android:title="Popular List"
+        android:orderInCategory="60"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_star_rate_white"/>
+
+    <item
+        android:id="@+id/action_top_rated_list"
+        android:title="Top Rated List"
+        android:orderInCategory="70"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_movie_filter"/>
+
 </menu>

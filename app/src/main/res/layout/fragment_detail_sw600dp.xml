@@ -267,7 +267,7 @@
         android:clickable="true"
         app:elevation="20dp"
         app:pressedTranslationZ="12dp"
-        android:src="@drawable/ic_action_heart_light"
+        android:src="@drawable/ic_action_heart_gray"
         app:layout_anchor="@id/app_bar_layout"
         app:layout_anchorGravity="bottom|right|end"/>
 

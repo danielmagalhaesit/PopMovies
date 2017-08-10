@@ -55,7 +55,7 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.v(LOG_TAG, "onPerformSync Called.");
 
         String movieOrVideo = extras.getString(Constants.MOVIE_OR_VIDEO);
-        String sortBy = Utility.getSortBy(getContext());
+//        String sortBy = Utility.getSortBy(getContext());
         String idMovieDb = extras.getString(Constants.MOVIE_DB_ID);
         String idMovieDatabase = extras.getString(Constants.MOVIE_ID);
 
@@ -66,10 +66,16 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
             switch (movieOrVideo) {
                 case Constants.MOVIE: {
                     builtUri = Uri.parse(Constants.MOVIE_BASE_URL).buildUpon()
-                            .appendEncodedPath(sortBy)
+                            .appendEncodedPath(Constants.POPULAR)
                             .appendQueryParameter(Constants.API_KEY, BuildConfig.THE_MOVIE_DB_API_KEY)
                             .build();
-                    setMoviesFromJson(getJSON(builtUri), sortBy);
+                    setMoviesFromJson(getJSON(builtUri), Constants.POPULAR);
+
+                    builtUri = Uri.parse(Constants.MOVIE_BASE_URL).buildUpon()
+                            .appendEncodedPath(Constants.TOP_RATED)
+                            .appendQueryParameter(Constants.API_KEY, BuildConfig.THE_MOVIE_DB_API_KEY)
+                            .build();
+                    setMoviesFromJson(getJSON(builtUri), Constants.TOP_RATED);
                     break;
                 }
                 case Constants.VIDEO: {

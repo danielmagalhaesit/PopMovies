@@ -21,4 +21,14 @@ public class Utility {
 
         return sortBy;
     }
+
+    public static void setSortBy(Context context, String sortBy){
+        // Getting the Sort By preference from shared preferences
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(context.getString(R.string.pref_sort_key), sortBy);
+        editor.commit();
+    }
+
 }

@@ -241,10 +241,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 //        Populating view according to the loader.
         switch (loader.getId()) {
             case MOVIE_VIDEO_LOADER: {
-                mVideosAdapter.swapCursor(cursor);
-                mVideosAdapter.notifyDataSetChanged();
-                mVideosAdapter.setClickListener(this);
-
                 String backdropPath = ("https://image.tmdb.org/t/p/original/" + cursor.getString(COL_BACKDROP));
                 Picasso.with(getContext())
                         .load(backdropPath)
@@ -314,6 +310,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         contentValues.clear();
                     }
                 });
+
+                mVideosAdapter.swapCursor(cursor);
+                mVideosAdapter.notifyDataSetChanged();
+                mVideosAdapter.setClickListener(this);
 
                 break;
             }

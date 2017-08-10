@@ -50,5 +50,8 @@
     <string name="sync_account_type">popmovie.daniel.com</string>
     <string name="marked_as_favorite">The movie is marked as favorite</string>
     <string name="removed_from_favorite_list">The movie is no longer marked as favorite</string>
+    <string name="popular_movie_list">Popular movies list</string>
+    <string name="top_rated_movie_list">Top rated movies list</string>
+    <string name="favorite_movie_list">Favorite movies list</string>
 
 </resources>

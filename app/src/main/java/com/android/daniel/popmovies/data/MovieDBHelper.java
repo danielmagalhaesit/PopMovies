@@ -13,7 +13,7 @@ import com.android.daniel.popmovies.data.MovieContract.ReviewEntry;
 
 public class MovieDBHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     static final String DATABASE_NAME = "popmovie.db";
 
@@ -37,7 +37,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_POPULAR + " INTEGER DEFAULT 0 ," +
                 MovieEntry.COLUMN_TOP_RATED + " INTEGER DEFAULT 0 ," +
 
-                " UNIQUE (" + MovieEntry.COLUMN_MOVIE_ID + ") ON CONFLICT REPLACE);";
+                " UNIQUE (" + MovieEntry.COLUMN_MOVIE_ID + ") ON CONFLICT IGNORE);";
 
         final String SQL_CREATE_VIDEO_TABLE = "CREATE TABLE " + VideoEntry.TABLE_NAME + " (" +
                 VideoEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +

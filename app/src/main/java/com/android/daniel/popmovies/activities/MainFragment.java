@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.android.daniel.popmovies.R;
 import com.android.daniel.popmovies.adapters.CursorMovieAdapter;
@@ -50,6 +51,9 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState == null){
+            onSortByChanged();
+        }
         setHasOptionsMenu(true);
     }
 
@@ -63,20 +67,34 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
         // Starting the Settings Activity
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(getActivity(), SettingsActivity.class);
-            startActivity(intent);
-            return true;
+        switch (id){
+            case R.id.action_popular_list: {
+                Utility.setSortBy(getContext(), Constants.POPULAR );
+                getLoaderManager().destroyLoader(FAVORITES_LOADER);
+                getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
+                Toast.makeText(getContext(), R.string.popular_movie_list, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            case R.id.action_top_rated_list: {
+                Utility.setSortBy(getContext(), Constants.TOP_RATED);
+                getLoaderManager().destroyLoader(FAVORITES_LOADER);
+                getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
+                Toast.makeText(getContext(), R.string.top_rated_movie_list, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            case R.id.action_favorite_list: {
+                getLoaderManager().restartLoader(FAVORITES_LOADER, null, this);
+                Toast.makeText(getContext(), R.string.favorite_movie_list, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
         }
-        if(id == R.id.action_favorite_list){
-            getLoaderManager().restartLoader(FAVORITES_LOADER, null, this);
-        }
+
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onResume() {
-        onSortByChanged();
         super.onResume();
     }
 
@@ -130,7 +148,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         if (NetworkUtil.isNetworkConnected(getActivity())) {
             Bundle bundle = new Bundle();
             bundle.putString(Constants.MOVIE_OR_VIDEO, Constants.MOVIE);
-            PopMovieSyncAdapter.syncImmediately(getActivity());
+            PopMovieSyncAdapter.syncImmediately(getActivity(), bundle);
         } else {
             View view = getActivity().findViewById(R.id.frame_main_fragment);
             Snackbar snackbar = Snackbar.make(view, getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
@@ -148,7 +166,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     void onSortByChanged() {
         loadMovie();
         getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
-        getLoaderManager().destroyLoader(FAVORITES_LOADER);
+//        getLoaderManager().destroyLoader(FAVORITES_LOADER);
     }
 
     @Override
@@ -163,12 +181,12 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             }
             case FAVORITES_LOADER:
             {
-                sortBy = "favorite";
+                sortBy = Constants.FAVORITE;
                 break;
             }
             default:
             {
-                sortBy = "popular";
+                sortBy = Constants.POPULAR;
                 break;
             }
         }

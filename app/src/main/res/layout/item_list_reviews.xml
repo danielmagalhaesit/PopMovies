@@ -19,7 +19,6 @@
             android:id="@+id/tv_author_review"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="OSEANSADITYA"
             android:textSize="14sp"
             android:textStyle="bold"
             android:paddingTop="4dp"/>
@@ -30,8 +29,7 @@
             android:id="@+id/tv_content_review"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="italic"
-            android:text="The story may not be the most original, with its Shakespearean turn overs, but it is well shaped and Serkis performance is remarkable. The animation of the apes, which was already superb in the previous movie, finally reaches a level in which you can believe they are more real than the human actors. Maybe a bit too long, but a good time for a not totally dumb movie."/>
+            android:textStyle="italic"/>
 
     </LinearLayout>
 
