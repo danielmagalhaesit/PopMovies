@@ -7,11 +7,14 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.IntDef;
 import android.util.Log;
 
 import com.android.daniel.popmovies.BuildConfig;
@@ -21,7 +24,6 @@ import com.android.daniel.popmovies.models.Movie;
 import com.android.daniel.popmovies.models.Review;
 import com.android.daniel.popmovies.models.Video;
 import com.android.daniel.popmovies.utils.Constants;
-import com.android.daniel.popmovies.utils.Utility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,6 +33,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Vector;
@@ -41,10 +45,21 @@ import java.util.Vector;
 
 public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
+
     private final String LOG_TAG = PopMovieSyncAdapter.class.getSimpleName();
 
     public static final int SYNC_INTERVAL = 60 * 360;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({STATUS_OK, STATUS_SERVER_DOWN, STATUS_SERVER_INVALID, STATUS_UNKNOWN, STATUS_INVALID})
+    public @interface MovieStatus {}
+
+    public static final int STATUS_OK = 0;
+    public static final int STATUS_SERVER_DOWN = 1;
+    public static final int STATUS_SERVER_INVALID = 2;
+    public static final int STATUS_UNKNOWN = 3;
+    public static final int STATUS_INVALID = 4;
 
     public PopMovieSyncAdapter(Context context, boolean autoInitialize){
         super(context, autoInitialize);
@@ -214,10 +229,12 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             Log.d(LOG_TAG, "Movies Complete. " + inserted + " Inserted");
+            setMovieStatus(getContext(), STATUS_OK);
 
         } catch (JSONException e){
             e.printStackTrace();
             Log.e(LOG_TAG, e.getMessage(), e);
+            setMovieStatus(getContext(), STATUS_SERVER_INVALID);
         }
     }
 
@@ -252,10 +269,13 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             Log.d(LOG_TAG, "Videos Complete. " + inserted + " Inserted");
+            setMovieStatus(getContext(), STATUS_OK);
+
 
         } catch (JSONException e){
             e.printStackTrace();
             Log.e(LOG_TAG, e.getMessage(), e);
+            setMovieStatus(getContext(), STATUS_SERVER_INVALID);
         }
     }
     public String getJSON(Uri uriGetJson) {
@@ -288,6 +308,7 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             if (buffer.length() == 0) {
+                setMovieStatus(getContext(), STATUS_SERVER_DOWN);
                 return null;
             }
 
@@ -295,10 +316,15 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
             Log.v(LOG_TAG, "Json String: " + jsonString);
 
-        } catch (RuntimeException | IOException e) {
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Error ", e);
+            setMovieStatus(getContext(), STATUS_SERVER_DOWN);
+            return null;
+        }catch (RuntimeException e){
             Log.e(LOG_TAG, "Error ", e);
             return null;
-        } finally {
+        }
+        finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
@@ -346,10 +372,13 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             Log.d(LOG_TAG, "Reviews Complete. " + inserted + " Inserted");
+            setMovieStatus(getContext(), STATUS_OK);
+
 
         } catch (JSONException e){
             e.printStackTrace();
             Log.e(LOG_TAG, e.getMessage(), e);
+            setMovieStatus(getContext(), STATUS_SERVER_INVALID);
         }
     }
 
@@ -392,6 +421,13 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
     public static void initializeSyncAdapter(Context context) {
         getSyncAccount(context);
+    }
+
+    static private void setMovieStatus(Context c, @MovieStatus int movieStatus){
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putInt(c.getString(R.string.movie_status), movieStatus);
+        editor.commit();
     }
 
 }

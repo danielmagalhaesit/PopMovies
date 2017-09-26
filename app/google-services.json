@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "923240663749",
+    "firebase_url": "https://popmovie-176922.firebaseio.com",
+    "project_id": "popmovie-176922",
+    "storage_bucket": "popmovie-176922.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:923240663749:android:b4af25e59a392086",
+        "android_client_info": {
+          "package_name": "com.android.daniel.popmovies"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "923240663749-fvidc20uvb6f9ohk0ssc2sf4g1e45dse.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNqViFLNRzwWHCgHBET_0SFC23wUhRupE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

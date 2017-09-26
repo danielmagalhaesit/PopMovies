@@ -1,9 +1,11 @@
 package com.android.daniel.popmovies.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -19,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.daniel.popmovies.R;
@@ -30,7 +33,8 @@ import com.android.daniel.popmovies.utils.NetworkUtil;
 import com.android.daniel.popmovies.utils.Utility;
 
 
-public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
+        SharedPreferences.OnSharedPreferenceChangeListener{
 
 
     private CursorMovieAdapter mMovieAdapter;
@@ -95,7 +99,16 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onResume() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        super.onPause();
     }
 
     @Override
@@ -107,7 +120,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         mGridView = (GridView) rootView.findViewById(R.id.gridview_movies);
+        View emptyView = rootView.findViewById(R.id.empty_view_grid);
+        mGridView.setEmptyView(emptyView);
         mGridView.setAdapter(mMovieAdapter);
+
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -150,16 +166,16 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             bundle.putString(Constants.MOVIE_OR_VIDEO, Constants.MOVIE);
             PopMovieSyncAdapter.syncImmediately(getActivity(), bundle);
         } else {
-            View view = getActivity().findViewById(R.id.frame_main_fragment);
-            Snackbar snackbar = Snackbar.make(view, getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
-            snackbar.setAction(getString(R.string.retry), new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    loadMovie();
-                }
-            });
-            snackbar.show();
+//            View view = getActivity().findViewById(R.id.fragment_main_id);
+//            Snackbar snackbar = Snackbar.make(view, getString(R.string.no_internet_connection), Snackbar.LENGTH_LONG);
+//            snackbar.setAction(getString(R.string.retry), new View.OnClickListener() {
+//
+//                @Override
+//                public void onClick(View view) {
+//                    loadMovie();
+//                }
+//            });
+//            snackbar.show();
         }
     }
 
@@ -221,6 +237,14 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         mMovieAdapter.swapCursor(null);
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if(key.equals(getString(R.string.movie_status))){
+            updateEmptyView();
+        }
+
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -233,5 +257,32 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
          * DetailFragmentCallback for when an item has been selected.
          */
         public void onItemSelected(long idMovie, long movieDbId);
+    }
+
+    private void updateEmptyView() {
+        if (mMovieAdapter.getCount() == 0) {
+            TextView tv = (TextView) getView().findViewById(R.id.empty_view_grid);
+            if (null != tv) {
+                // if cursor is empty, why? do we have an invalid location
+                int message = R.string.empty_movie_list;
+                @PopMovieSyncAdapter.MovieStatus int location = Utility.getMovieStatus(getActivity());
+                switch (location) {
+                    case PopMovieSyncAdapter.STATUS_SERVER_DOWN:
+                        message = R.string.empty_movie_list_server_down;
+                        break;
+                    case PopMovieSyncAdapter.STATUS_SERVER_INVALID:
+                        message = R.string.empty_movie_list_server_error;
+                        break;
+                    case PopMovieSyncAdapter.STATUS_INVALID:
+                        message = R.string.empty_movie_list_invalid_sort_by;
+                        break;
+                    default:
+                        if (!NetworkUtil.isNetworkConnected(getActivity())) {
+                            message = R.string.empty_movie_list_no_network;
+                        }
+                }
+                tv.setText(message);
+            }
+        }
     }
 }

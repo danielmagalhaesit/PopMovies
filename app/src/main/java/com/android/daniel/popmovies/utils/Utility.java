@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.android.daniel.popmovies.R;
+import com.android.daniel.popmovies.sync.PopMovieSyncAdapter;
 
 /**
  * Created by danie on 08/06/2017.
@@ -31,4 +32,13 @@ public class Utility {
         editor.commit();
     }
 
+    @SuppressWarnings("ResourceType")
+    static public @PopMovieSyncAdapter.MovieStatus int getMovieStatus(Context context){
+        // Getting the Movie Status preference from shared preferences
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        // The second parameter is the default in case the file is empty.
+        return sharedPreferences.getInt(context.getString(R.string.movie_status)
+                , PopMovieSyncAdapter.STATUS_UNKNOWN);
+
+    }
 }

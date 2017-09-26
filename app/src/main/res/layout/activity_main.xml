@@ -37,4 +37,13 @@
     tools:context="com.android.daniel.popmovies.activities.MainFragment"
     tools:layout="@android:layout/list_content" />
 
+    <!--Empty View-->
+    <TextView
+        android:text="@string/no_information_available"
+        android:id="@+id/empty_view_grid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+
 </LinearLayout>
